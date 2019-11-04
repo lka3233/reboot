@@ -1,6 +1,6 @@
 public class Task4{
 	public static void main(String[] args){
-		String s = "2 + 2 * 2 + 9";
+		String s = "2 + 2 * 2 + 9 / 2";
 		calc(s);
 	}
 	
