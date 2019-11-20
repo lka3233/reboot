@@ -1,6 +1,6 @@
 package com.company;
 
-public class MyLinkedList{
+public class MyLinkedList<T>{
     private int size = 0;
     private Entry first;
     private Entry last;
@@ -8,9 +8,9 @@ public class MyLinkedList{
     private class Entry{
         private Entry next;
         private Entry prev;
-        Object value;
+        T value;
 
-        public Entry(Object value){
+        public Entry(T value){
             this.value = value;
             size++;
         }
@@ -20,7 +20,7 @@ public class MyLinkedList{
      * Добавляет элемент в конец списка
      * @param element элемент типа Object
      */
-    public void addLast(Object element) {
+    public void addLast(T element) {
         if (size == 0){//если список пустой
             first = last = new Entry(element);
         } else{
@@ -35,7 +35,7 @@ public class MyLinkedList{
      * Добавляет элемент в начало списка
      * @param element элемент типа Object
      */
-    public void addFirst(Object element){
+    public void addFirst(T element){
         if (size == 0){//если список пустой
             first = last = new Entry(element);
         } else{
@@ -51,7 +51,7 @@ public class MyLinkedList{
      * @param index позиция вставки
      * @param element вставляемый элемент
      */
-    public void add(int index, Object element){
+    public void add(int index, T element){
         if (isLegalOperation(index)){
             Entry bufferEntry = first;
             for (int i = 0; i < size; i++) {
@@ -72,7 +72,7 @@ public class MyLinkedList{
      * @param index индекс
      * @return объект
      */
-    public Object get(int index){
+    public T get(int index){
         if (isLegalOperation(index)){
             Entry bufferEntry = first;
             for (int i = 0; i < size; i++) {
@@ -128,7 +128,7 @@ public class MyLinkedList{
      * Возвращает значение первого элемента
      * @return
      */
-    public Object getFirst(){
+    public T getFirst(){
         return first.value;
     }
 
@@ -136,8 +136,31 @@ public class MyLinkedList{
      * возвращает значение последнего элемента
      * @return
      */
-    public Object getLast(){
+    public T getLast(){
         return last.value;
     }
 
+    /**
+     * возвращает последний элемент и удаляет его
+     */
+    public T pickLast(){
+        T returnStatment = getLast();
+        removeLast();
+        return returnStatment;
+    }
+
+    /**
+     * Удаляет последний элемент
+     */
+    public void removeLast(){
+        if (size > 1){
+            last.prev.next = null;
+            last = last.prev;
+            size--;
+        } else {
+            last = null;
+            size--;
+        }
+
+    }
 }
