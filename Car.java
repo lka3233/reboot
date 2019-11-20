@@ -29,6 +29,18 @@ public class Car {
     public String toString(){
         return "Тип: С" + codeCar + " Госномер: " + gosNumber + " Пробег: " + mileage + " Доп.параметр: " + dopParametr + " Тип топлива: " + gasolineType + " Расход: " + fuelConsuption;
     }
+
+    /**
+     * сравнивает объект по полям "тип" и "госномер"
+     * @param car сравниваемый объект
+     * @return true если тип и госномер совпадают, иначе false
+     */
+    public boolean equal(Car car){
+        if (this.getCodeCar() == car.getCodeCar() && this.getGosNumber().equals(car.getGosNumber()))
+            return true;
+        else
+            return false;
+    }
     private double parseGasolineType(int codeCar){
         double gasType = 0;
         switch (codeCar) {
@@ -74,5 +86,12 @@ public class Car {
     }
     public int getMileage(){
         return mileage;
+    }
+    public String getGosNumber(){
+        return gosNumber;
+    }
+
+    public void sumMilleage(Car car){
+        this.mileage += car.getMileage();
     }
 }

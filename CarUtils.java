@@ -1,12 +1,55 @@
 package com.company;
 
 public class CarUtils {
+    /**
+     *
+     * @param inputArray
+     * @return
+     */
     public static Car[] createCarArray(String[] inputArray){//парсим массив строк, создаем и возвращаем массив объектов
         Car[] carArray = new Car[inputArray.length];
         for (int i = 0; i < inputArray.length; i++) {
             carArray[i] = createCar(inputArray[i]);
         }
-        return carArray;
+        return removeDuplicates(carArray);
+    }
+
+    /**
+     * сравнивает поэлементно объекты на совпадения типа тс и гос.номера. при совпадении увеличивает пробег у первого элемента, второй заменяет на null
+     * @param carArray
+     * @return массив с null на месте дублей
+     */
+    private static Car[] removeDuplicates(Car[] carArray) {
+        int nullNumbers = 0;
+        for (int i = 0; i < carArray.length ; i++) {
+            for (int j = carArray.length - 1; j > i; j--) {
+                if (carArray[j] != null)
+                    if (carArray[i].equal(carArray[j])){
+                        carArray[i].sumMilleage(carArray[j]);
+                        carArray[j] = null;
+                        nullNumbers++;
+                    }
+            }
+        }
+        return getFinalizedcarArray(carArray, nullNumbers);
+    }
+
+    /**
+     * Чистим массив от null-элементов
+     * @param carArrayWithNulls - массив, в котором присутствуют элементы null
+     * @param nullNumbers - число таких элементов
+     * @return массив, очищеный от null-элементов
+     */
+    private static Car[] getFinalizedcarArray(Car[] carArrayWithNulls, int nullNumbers){
+        Car[] cleanCarArray = new Car[carArrayWithNulls.length - nullNumbers];
+        int j = 0;
+        for (int i = 0; i < carArrayWithNulls.length; i++) {
+            if (carArrayWithNulls[i] != null){
+                cleanCarArray[j] = carArrayWithNulls[i];
+                j++;
+            }
+        }
+        return cleanCarArray;
     }
     private static Car createCar(String inputString){ // парсим строку и создаем объект Car
         String[] firstLevelSplitArr = inputString.split("_");//первый сплит-тип тачки и неразбитая строка с параметрами
@@ -46,7 +89,7 @@ public class CarUtils {
         }
         return summaryCosts;
     }
-    public static double fingMinCostType(Car[] inputCarArray){// возвращает тип авто с минимальным расходом
+    public static double findMinCostType(Car[] inputCarArray){// возвращает тип авто с минимальным расходом
         double minCost = findCosts(inputCarArray, 100);
         for (int i = 200; i < 500; i += 100) {
             if (minCost > findCosts(inputCarArray, i))
