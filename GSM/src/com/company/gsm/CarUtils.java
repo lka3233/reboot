@@ -1,159 +1,115 @@
 package com.company.gsm;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Scanner;
+import java.util.ArrayList;
+import java.util.ListIterator;
 
 /**
  * Утильный класс для проекта ГСМ.
  * Содержит метода для расчетов гсм
- *
  */
 public class CarUtils {
+    private static ArrayList<Car> currentCarList = null;//тут будем хранить все созданные машины в текущем расчете
+
     /**
-     *парсим массив строк, создаем и возвращаем массив объектов
-     * @param inputArray
-     * @return
+     *создаем пустую коллекцию для хранения авто
      */
-    public static Car[] createCarArray(String[] inputArray){
-        Car[] carArray = new Car[inputArray.length];
-        for (int i = 0; i < inputArray.length; i++) {
-            carArray[i] = createCar(inputArray[i]);
-        }
-        return removeDuplicates(carArray);
+    public static void createCarList(){
+        currentCarList = new ArrayList<>();
     }
 
     /**
-     * сравнивает поэлементно объекты на совпадения типа тс и гос.номера. при совпадении увеличивает пробег у первого элемента, второй заменяет на null
-     * @param carArray
-     * @return массив с null на месте дублей
+     * добавляем в текущий расчет новый автомобиль, если в листе уже есть авто такого типа с таким номером - плюсуем к нему пробег и доппараметр
+     * @param carToAdd добавляемый автомобиль
      */
-    private static Car[] removeDuplicates(Car[] carArray) {
-        int nullNumbers = 0;
-        for (int i = 0; i < carArray.length ; i++) {
-            for (int j = carArray.length - 1; j > i; j--) {
-                if (carArray[j] != null)
-                    if (carArray[i].equal(carArray[j])){
-                        carArray[i].sumMilleage(carArray[j]);
-                        carArray[j] = null;
-                        nullNumbers++;
-                    }
+    public static void addCar(Car carToAdd){
+        boolean foundFlag = false;//флаг наличия объекта в памяти
+        ListIterator<Car> iterator = (ListIterator<Car>) currentCarList.iterator();
+
+        while (iterator.hasNext()){
+            Car nextCar = iterator.next();
+            if (nextCar.equal(carToAdd)){
+                nextCar.mileage += carToAdd.mileage;
+                //вот тут засада, т.к. в коллеции объекты суперкласс Car без поля с доппараметром приходиться проверять тип авто по коду и приводить его к соответствующему классу
+                switch (nextCar.codeCar){
+                    case 200:
+                        if ((nextCar instanceof HeavyCar) && (carToAdd instanceof HeavyCar))
+                        ((HeavyCar) nextCar).dopParametrValue += ((HeavyCar) carToAdd).dopParametrValue;
+                        break;
+                    case 300:
+                        if ((nextCar instanceof Bus) && (carToAdd instanceof Bus))
+                            ((Bus) nextCar).dopParametrValue += ((Bus) carToAdd).dopParametrValue;
+                        break;
+                    case 400:
+                        if ((nextCar instanceof LiftingCar) && (carToAdd instanceof LiftingCar))
+                            ((LiftingCar) nextCar).dopParametrValue += ((LiftingCar) carToAdd).dopParametrValue;
+                        break;
+                }
+                foundFlag = true;
+                break;
             }
         }
-        return getFinalizedcarArray(carArray, nullNumbers);
+        if (!(foundFlag))
+            currentCarList.add(carToAdd);
     }
 
     /**
-     * Чистим массив от null-элементов
-     * @param carArrayWithNulls - массив, в котором присутствуют элементы null
-     * @param nullNumbers - число таких элементов
-     * @return массив, очищеный от null-элементов
+     * считает общие расходы на гсм
+     * @return сумма расходов всех тачек
      */
-    private static Car[] getFinalizedcarArray(Car[] carArrayWithNulls, int nullNumbers){
-        Car[] cleanCarArray = new Car[carArrayWithNulls.length - nullNumbers];
-        int j = 0;
-        for (int i = 0; i < carArrayWithNulls.length; i++) {
-            if (carArrayWithNulls[i] != null){
-                cleanCarArray[j] = carArrayWithNulls[i];
-                j++;
-            }
-        }
-        return cleanCarArray;
-    }
-    private static Car createCar(String inputString){ // парсим строку и создаем объект Car
-        String[] firstLevelSplitArr = inputString.split("_");//первый сплит-тип тачки и неразбитая строка с параметрами
-        int codeCar = Integer.parseInt(firstLevelSplitArr[0].substring(1));//чистим код тачки и преобразуем в инт
-        String[] secondLevelSplitArr = firstLevelSplitArr[1].split("-");//делим строку с параметрами
-        String gosNumber = secondLevelSplitArr[0];
-        int mileage = Integer.parseInt(secondLevelSplitArr[1]);//преобразуем в инт пробег
-//создаем объект в зависимости от наличия доппараметра
-        if (secondLevelSplitArr.length == 2)
-            return new Car(codeCar, gosNumber, mileage);
-        else{
-            int dopParametr = Integer.parseInt(secondLevelSplitArr[2]);
-            return new Car(codeCar, gosNumber, mileage, dopParametr);
-        }
-    }
-    public static double findCosts(Car[] inputCarArray){//считает общие расходы на гсм
+    public static double findCosts(){//считает общие расходы на гсм
         double summaryCosts = 0;
-        for (Car car : inputCarArray) {
-            summaryCosts += car.getCost();
+        for (Car car : currentCarList) {
+            summaryCosts += car.calcCost();
         }
         return summaryCosts;
     }
-    public static double findCosts(Car[] inputCarArray, int codeCar){//считает общие расходы на гсм по типу тачки, полученному в инте
+
+    /**
+     * считает общие расходы на гсм по типу тачки, полученному в инте
+     * @param codeCar код тачки в инте
+     * @return расходы по конкретному типу машины
+     */
+    public static double findCosts(int codeCar){
         double summaryCosts = 0;
-        for (Car car : inputCarArray) {
+        for (Car car : currentCarList) {
             if (car.getCodeCar() == codeCar)
-                summaryCosts += car.getCost();
+                summaryCosts += car.calcCost();
         }
         return summaryCosts;
     }
-    public static double findCosts(Car[] inputCarArray, String codeCar){//считает общие расходы на гсм по типу тачки, полученному в стринге
-        double summaryCosts = 0;
-        int codeCarInt = Integer.parseInt(codeCar.substring(1));
-        for (Car car : inputCarArray) {
-            if (car.getCodeCar() == codeCarInt)
-                summaryCosts += car.getCost();
-        }
-        return summaryCosts;
-    }
-    public static double findMinCostType(Car[] inputCarArray){// возвращает тип авто с минимальным расходом
-        double minCost = findCosts(inputCarArray, 100);
+
+    /**
+     * Метод возвращает какой тип авто за день принесло минимальный расход
+     * @return тип авто в инте
+     */
+    public static double findMinCostType(){// возвращает тип авто с минимальным расходом
+        double minCost = findCosts(100);
         for (int i = 200; i < 500; i += 100) {
-            if (minCost > findCosts(inputCarArray, i))
-                minCost = findCosts(inputCarArray, i);
+            if (minCost > findCosts(i))
+                minCost = findCosts(i);
         }
         return minCost;
     }
-    public static double findMaxCostType(Car[] inputCarArray){
-        double maxCost = findCosts(inputCarArray, 100);
+
+    /**
+     * Метод возвращает какой тип авто за день принесло максимальный расход
+     * @return тип авто в инте
+     */
+    public static double findMaxCostType(){
+        double maxCost = findCosts(100);
         for (int i = 200; i < 500; i += 100) {
-            if (maxCost < findCosts(inputCarArray, i))
-                maxCost = findCosts(inputCarArray, i);
+            if (maxCost < findCosts(i))
+                maxCost = findCosts(i);
         }
         return maxCost;
     }
-    public static void printSortedCars(Car[] inputCarArray, String sortType){//в разрезе каждого типа авто выводят информацию о каждом авто (тип, номер, пробег, доп. параметр)
-        if (sortType.equalsIgnoreCase("milleage"))
-            sortCarArrayByMilleage(inputCarArray);
-        else if (sortType.equalsIgnoreCase("dopparametr"))
-            sortCarArrayByDopParametr(inputCarArray);
-        else{
-            System.out.println("incorrect type of sort parametr. printing without sort");
-        }
-        for (Car car : inputCarArray) {
+
+    /**
+     * Вывод на экран всех машин в памяти
+     */
+    public static void printCars(){
+        for (Car car : currentCarList) {
             System.out.println(car);
         }
     }
-    private static Car[] sortCarArrayByDopParametr(Car[] inputCarArray){// сортируем массив по доппараметру
-        for (int i = 0; i < inputCarArray.length; i++) {
-            for (int j = inputCarArray.length - 1; j > i ; j--) {
-                if(inputCarArray[j].getDopParametr() < inputCarArray[i].getDopParametr()){
-                    Car bufValue = inputCarArray[i];
-                    inputCarArray[i] = inputCarArray[j];
-                    inputCarArray[j] = bufValue;
-                }
-            }
-        }
-        return inputCarArray;
-    }
-    private static Car[] sortCarArrayByMilleage(Car[] inputCarArray){// сортируем массив по пробегу
-        for (int i = 0; i < inputCarArray.length; i++) {
-            for (int j = inputCarArray.length - 1; j > i ; j--) {
-                if(inputCarArray[j].getMileage() < inputCarArray[i].getMileage()){
-                    Car bufValue = inputCarArray[i];
-                    inputCarArray[i] = inputCarArray[j];
-                    inputCarArray[j] = bufValue;
-                }
-            }
-        }
-        return inputCarArray;
-    }
-
 }

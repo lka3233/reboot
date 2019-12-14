@@ -1,0 +1,121 @@
+import test.DaysEnum;
+
+import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
+
+public class Main {
+
+    public static void main(String[] args) {
+        File file = new File("");
+
+        // Позволяем рабоать с символьными данными
+        try(FileReader fr = new FileReader(file)) {
+            char[] buf = new char[256];
+            int c;
+            while((c = fr.read(buf))>0){
+                if(c < 256){
+                    buf = Arrays.copyOf(buf, c);
+                }
+                System.out.print(buf);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Позволяем рабоать с символьными данными
+        try(FileReader fr = new FileReader(file)) {
+            // Буфферизация
+            BufferedReader br = new BufferedReader(fr);
+            while (br.ready()) {
+                System.out.println(br.readLine());
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Обычный байтовый поток для чтения
+        try(FileInputStream fl = new FileInputStream(file)) {
+            // читаем посимвольно
+            int c;
+            while((c = fl.read()) != -1){
+                System.out.print((char)c);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Обычный байтовый поток для чтения
+        try(FileInputStream fl = new FileInputStream(file)) {
+            BufferedInputStream bri = new BufferedInputStream(fl);
+            // читаем посимвольно
+            int c;
+            while((c = bri.read()) != -1){
+                System.out.print((char)c);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Простая запись из одного файла в другой
+        try(FileOutputStream fw = new FileOutputStream(file)) {
+            String sinpleText = "Hello world!!!";
+            byte[] buffer = sinpleText.getBytes();
+            fw.write(buffer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Простая запись из одного файла в другой
+        try(FileReader fr = new FileReader(file); FileWriter fw = new FileWriter(file, true)) {
+            // Буфферизация
+            BufferedReader br = new BufferedReader(fr);
+            BufferedWriter bw = new BufferedWriter(fw);
+            while (br.ready()) {
+                bw.write(br.readLine());
+                System.out.println(br.readLine());
+            }
+            br.close();
+            bw.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Считывание через NIO
+        Path path = Paths.get("");
+        if (Files.exists(path)) {
+            System.out.println("Путь существует");
+            try {
+                List<String> lists = Files.readAllLines(path, Charset.defaultCharset());
+                for (String st : lists) {
+                    System.out.println(st);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static void readConsole() {
+        Scanner sc = new Scanner(System.in);
+        List<String> list = new ArrayList<>();
+        boolean check = true;
+        while (check) {
+            if (sc.nextLine().equals("EXIT")) {
+                check = false;
+            } else {
+                list.add(sc.next());
+            }
+        }
+
+        System.out.println("Size = " +
+                list.size());
+    }
+
+
+}
