@@ -1,5 +1,7 @@
 package com.company.gsm;
 
+import java.util.HashMap;
+
 public abstract class Car {
     protected int codeCar;
     protected String gosNumber;
@@ -7,10 +9,13 @@ public abstract class Car {
     protected double gasolineType;
     protected double fuelConsumption;
     protected double cost;
-    public Car(int codeCar, String gosNumber, int mileage){
+    public Car(int codeCar, String gosNumber, int mileage, HashMap<Integer, Double> gasolineTypeMap, HashMap<Integer, Double> fuelConsumption){
         this.codeCar = codeCar;
         this.gosNumber = gosNumber;
         this.mileage = mileage;
+        this.gasolineType = gasolineTypeMap.get(this.codeCar);
+        this.fuelConsumption = fuelConsumption.get(this.codeCar);
+        this.cost = this.mileage * this.gasolineType * this.fuelConsumption;
     }
     public String toString(){
         return "Тип: С" + codeCar + " Госномер: " + gosNumber + " Пробег: " + mileage + " Тип топлива: " + gasolineType + " Расход: " + fuelConsumption;
