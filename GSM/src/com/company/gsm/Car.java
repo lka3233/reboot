@@ -2,7 +2,7 @@ package com.company.gsm;
 
 import java.util.HashMap;
 
-public abstract class Car {
+abstract class Car {
     protected int codeCar;
     protected String gosNumber;
     protected int mileage;

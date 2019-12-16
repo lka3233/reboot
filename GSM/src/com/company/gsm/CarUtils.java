@@ -23,25 +23,22 @@ public class CarUtils {
      */
     public static void addCar(Car carToAdd){
         boolean foundFlag = false;//флаг наличия объекта в памяти
-        ListIterator<Car> iterator = (ListIterator<Car>) currentCarList.iterator();
-
-        while (iterator.hasNext()){
-            Car nextCar = iterator.next();
-            if (nextCar.equal(carToAdd)){
-                nextCar.mileage += carToAdd.mileage;
+        for (Car car : currentCarList) {
+            if (car.equal(carToAdd)){
+                car.mileage += carToAdd.mileage;
                 //вот тут засада, т.к. в коллеции объекты суперкласс Car без поля с доппараметром приходиться проверять тип авто по коду и приводить его к соответствующему классу
-                switch (nextCar.codeCar){
+                switch (car.codeCar){
                     case 200:
-                        if ((nextCar instanceof HeavyCar) && (carToAdd instanceof HeavyCar))
-                        ((HeavyCar) nextCar).dopParametrValue += ((HeavyCar) carToAdd).dopParametrValue;
+                        if ((car instanceof HeavyCar) && (carToAdd instanceof HeavyCar))
+                        ((HeavyCar) car).dopParametrValue += ((HeavyCar) carToAdd).dopParametrValue;
                         break;
                     case 300:
-                        if ((nextCar instanceof Bus) && (carToAdd instanceof Bus))
-                            ((Bus) nextCar).dopParametrValue += ((Bus) carToAdd).dopParametrValue;
+                        if ((car instanceof Bus) && (carToAdd instanceof Bus))
+                            ((Bus) car).dopParametrValue += ((Bus) carToAdd).dopParametrValue;
                         break;
                     case 400:
-                        if ((nextCar instanceof LiftingCar) && (carToAdd instanceof LiftingCar))
-                            ((LiftingCar) nextCar).dopParametrValue += ((LiftingCar) carToAdd).dopParametrValue;
+                        if ((car instanceof LiftingCar) && (carToAdd instanceof LiftingCar))
+                            ((LiftingCar) car).dopParametrValue += ((LiftingCar) carToAdd).dopParametrValue;
                         break;
                 }
                 foundFlag = true;
@@ -82,26 +79,32 @@ public class CarUtils {
      * Метод возвращает какой тип авто за день принесло минимальный расход
      * @return тип авто в инте
      */
-    public static double findMinCostType(){// возвращает тип авто с минимальным расходом
+    public static int findMinCostType(){// возвращает тип авто с минимальным расходом
         double minCost = findCosts(100);
+        int type = 100;
         for (int i = 200; i < 500; i += 100) {
-            if (minCost > findCosts(i))
+            if (minCost > findCosts(i)) {
                 minCost = findCosts(i);
+                type = i;
+            }
         }
-        return minCost;
+        return type;
     }
 
     /**
      * Метод возвращает какой тип авто за день принесло максимальный расход
      * @return тип авто в инте
      */
-    public static double findMaxCostType(){
+    public static int findMaxCostType(){
         double maxCost = findCosts(100);
+        int type = 100;
         for (int i = 200; i < 500; i += 100) {
-            if (maxCost < findCosts(i))
+            if (maxCost < findCosts(i)) {
                 maxCost = findCosts(i);
+                type = i;
+            }
         }
-        return maxCost;
+        return type;
     }
 
     /**
@@ -111,5 +114,28 @@ public class CarUtils {
         for (Car car : currentCarList) {
             System.out.println(car);
         }
+    }
+
+    public static String getClassName(int codeCar) {
+        String returnString = null;
+        switch (codeCar){
+           case 100:
+               returnString = "Автомобиль";
+               break;
+           case 200:
+               returnString = "Автобус";
+               break;
+            case 300:
+                returnString = "Грузовой автомобиль";
+                break;
+            case 400:
+                returnString = "Подъемный кран";
+                break;
+        }
+        return returnString;
+    }
+
+    public static ArrayList<Car> getCurrentCarList(){
+        return currentCarList;
     }
 }
